@@ -9,41 +9,72 @@ import {
 	AsyncStorage,
 } from 'react-native';
 import { StackNavigator } from 'react-navigation';
+import axios from 'axios';
 
 class Login extends Component {
 
-	constructor(props){
+	constructor(props) {
 		super(props);
 		this.state = {
-			username: "",
+			email: "",
 			password: "",
 		}
+		this.handleLogin = this.handleLogin.bind(this);
 	}
 
 	componentsDidMount() {
 		this._loadInitialState().done();
 	}
+
 	_loadInitialState = async () => {
 
 		const value = await AsyncStorage.getItem('user');
 		if (value !== null) {
-			this.props.navigation.navigate('Profile');
+			this.props.navigation.navigate('Game');
 		}
-
 	}
+
+	handleLogin() {
+		alert(this.state.email, this.state.password);
+
+		fetch('https://agile-mountain-78716.herokuapp.com/auth', {
+		  method: 'POST',
+		  // headers: {
+		  //   Accept: 'application/json',
+		  //   'Content-Type': 'application/json',
+		  // },
+		  body: JSON.stringify({
+		    email: this.state.email,
+		    password: this.state.password,
+		  })
+		})
+		.then((response) => response.json())
+		.then((res) => {
+
+			if (res.success === true) {
+			AsyncStorage.setItem('user', res.user);
+			this.props.navigation.navigate('Game');
+			}else {
+				alert(res.message);
+			}
+
+		})
+		.done();
+	}
+
 	render() {
 		return (
 			<KeyboardAvoidingView behavior = 'padding' style = {styles.wrapper}>
 
 				<View style ={styles.container}>
 
-					<Text style = {styles.header}>SpaceInvaders</Text>
+					<Text style = {styles.header}>Alien Attackers</Text>
 					<Text style = {styles.header}>Login</Text>
 
 
 					<TextInput
-						style =	 {styles.textInput} placeholder = 'Username'
-						onChangeText = { (username) => this.setState({username}) }
+						style =	 {styles.textInput} placeholder = 'Eamil'
+						onChangeText = { (email) => this.setState({email}) }
 					/>
 
 					<TextInput
@@ -54,17 +85,14 @@ class Login extends Component {
 
 					<TouchableOpacity
 						style = {styles.btn}
-						onPress = {this.Login}>
+						onPress = {this.handleLogin}>
+						<Text>Login</Text>
 					</TouchableOpacity>
 
 				</View>
 
 			</KeyboardAvoidingView>
 		)
-	}
-
-	Login = ()=> {
-		alert('test');
 	}
 };
 
